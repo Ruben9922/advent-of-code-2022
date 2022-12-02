@@ -2,6 +2,8 @@ from enum import Enum
 from typing import Optional, List, Generator, Iterable
 
 Shape = Enum("Shape", ["ROCK", "PAPER", "SCISSORS"])
+shape_to_index = dict((shape, index) for index, shape in enumerate(Shape))
+index_to_shape = dict((index, shape) for index, shape in enumerate(Shape))
 
 
 def parse_opponent_selected_shape(shape_string: str) -> Optional[Shape]:
@@ -41,7 +43,6 @@ def compute_shape_score(shape: Optional[Shape]) -> int:
 
 
 def compute_outcome_score(round: tuple[Optional[Shape], Optional[Shape]]) -> int:
-    shape_to_index = dict((shape, index) for index, shape in enumerate(Shape))
     match (shape_to_index[round[1]] - shape_to_index[round[0]]) % 3:
         case 0:  # Draw
             return 3
@@ -68,6 +69,43 @@ def day_2_puzzle_1(puzzle_input: List[str]) -> None:
     print(total_score)
 
 
+Outcome = Enum("Outcome", ["WIN", "LOSE", "DRAW"])
+
+
+def parse_outcome(outcome_string: str) -> Optional[Outcome]:
+    match outcome_string:
+        case "X":
+            return Outcome.LOSE
+        case "Y":
+            return Outcome.DRAW
+        case "Z":
+            return Outcome.WIN
+        case _:
+            return None
+
+
+def infer_own_selected_shape_from_outcome(round: tuple[Optional[Shape], Optional[Outcome]])\
+        -> tuple[Optional[Shape], Optional[Shape]]:
+    match round[1]:
+        case Outcome.WIN:
+            return round[0], index_to_shape[((shape_to_index[round[0]] + 1) % 3)]
+        case Outcome.LOSE:
+            return round[0], index_to_shape[((shape_to_index[round[0]] + 2) % 3)]
+        case Outcome.DRAW:
+            return round[0], round[0]
+
+
+def day_2_puzzle_2(puzzle_input: List[str]) -> None:
+    strategy_guide = ((
+        parse_opponent_selected_shape(line.split()[0]),
+        parse_outcome(line.split()[1]),
+    ) for line in puzzle_input)
+
+    scores = (compute_score(infer_own_selected_shape_from_outcome(round)) for round in strategy_guide)
+    total_score = sum(scores)
+    print(total_score)
+
+
 if __name__ == "__main__":
     print("Enter or paste your content. Ctrl-D / Cmd-D to finish inputting.")
     contents = []
@@ -78,3 +116,4 @@ if __name__ == "__main__":
             break
         contents.append(line)
     day_2_puzzle_1(contents)
+    day_2_puzzle_2(contents)
