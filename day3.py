@@ -22,8 +22,7 @@ def day_3_puzzle_1(puzzle_input: List[str]) -> None:
 
 
 def chunks(list: List[T], chunk_size: int):
-    for i in range(0, len(list), chunk_size):
-        yield list[i:i + chunk_size]
+    return (list[i:i + chunk_size] for i in range(0, len(list), chunk_size))
 
 
 def day_3_puzzle_2(puzzle_input: List[str]) -> None:
