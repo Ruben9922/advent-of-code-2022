@@ -1,5 +1,6 @@
 import itertools
-from typing import List, TypeVar
+from collections.abc import Generator
+from typing import TypeVar
 
 T = TypeVar("T")
 
@@ -13,7 +14,7 @@ def get_item_priority(item: str) -> int:
         return 0
 
 
-def day_3_puzzle_1(puzzle_input: List[str]) -> None:
+def day_3_puzzle_1(puzzle_input: list[str]) -> None:
     common_items = ((set(line[:len(line) // 2]).intersection(set(line[len(line) // 2:]))) for line in puzzle_input)
     common_items_flattened = itertools.chain.from_iterable(common_items)
     common_item_priorities = (get_item_priority(item) for item in common_items_flattened)
@@ -21,11 +22,11 @@ def day_3_puzzle_1(puzzle_input: List[str]) -> None:
     print(total_priority)
 
 
-def chunks(list: List[T], chunk_size: int):
+def chunks(list: list[T], chunk_size: int) -> Generator[list[str], None, None]:
     return (list[i:i + chunk_size] for i in range(0, len(list), chunk_size))
 
 
-def day_3_puzzle_2(puzzle_input: List[str]) -> None:
+def day_3_puzzle_2(puzzle_input: list[str]) -> None:
     rucksacks_by_group = chunks(puzzle_input, 3)
     badges_by_group = (set.intersection(*(set(rucksack) for rucksack in group_rucksacks))
                        for group_rucksacks in rucksacks_by_group)

@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Optional, List, Generator, Iterable
+from typing import Optional
 
 Shape = Enum("Shape", ["ROCK", "PAPER", "SCISSORS"])
 shape_to_index = dict((shape, index) for index, shape in enumerate(Shape))
@@ -58,7 +58,7 @@ def compute_score(round: tuple[Optional[Shape], Optional[Shape]]) -> int:
     return shape_score + outcome_score
 
 
-def day_2_puzzle_1(puzzle_input: List[str]) -> None:
+def day_2_puzzle_1(puzzle_input: list[str]) -> None:
     strategy_guide = ((
         parse_opponent_selected_shape(line.split()[0]),
         parse_own_selected_shape(line.split()[1]),
@@ -95,7 +95,7 @@ def infer_own_selected_shape_from_outcome(round: tuple[Optional[Shape], Optional
             return round[0], round[0]
 
 
-def day_2_puzzle_2(puzzle_input: List[str]) -> None:
+def day_2_puzzle_2(puzzle_input: list[str]) -> None:
     strategy_guide = ((
         parse_opponent_selected_shape(line.split()[0]),
         parse_outcome(line.split()[1]),
