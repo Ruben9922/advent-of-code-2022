@@ -42,7 +42,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	folderNodes, err := buildTree(commands)
+	folderNodes, rootNode, err := buildTree(commands)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -58,6 +58,20 @@ func main() {
 	}
 
 	fmt.Println(sum)
+
+	const totalSpace = 70_000_000
+	actualFreeSpace := totalSpace - rootNode.getSize()
+	const requiredFreeSpace = 30_000_000
+
+	minFolderSize := 0
+	for _, f := range folderNodes {
+		size := f.getSize()
+		if size >= requiredFreeSpace-actualFreeSpace && (minFolderSize == 0 || size < minFolderSize) {
+			minFolderSize = size
+		}
+	}
+
+	fmt.Println(minFolderSize)
 }
 
 type cdCommand struct {
@@ -178,15 +192,16 @@ func parse(input []string) ([]command, error) {
 	return commands, nil
 }
 
-func buildTree(commands []command) ([]*folderNode, error) {
+func buildTree(commands []command) ([]*folderNode, folderNode, error) {
 	folderNodes := make([]*folderNode, 0)
 	stack := make([]*folderNode, 0)
+	var rootFolderNode folderNode
 	for _, c := range commands {
 		switch c := c.(type) {
 		case cdCommand:
 			if c.directory == "/" {
 				newMap := make(map[string]node)
-				rootFolderNode := folderNode{name: c.directory, children: newMap}
+				rootFolderNode = folderNode{name: c.directory, children: newMap}
 				stack = append(stack, &rootFolderNode)
 				folderNodes = append(folderNodes, &rootFolderNode)
 			} else {
@@ -199,7 +214,7 @@ func buildTree(commands []command) ([]*folderNode, error) {
 			}
 		case cdParentCommand:
 			if len(stack) == 0 {
-				return folderNodes, errors.New("cannot navigate to parent of root directory")
+				return folderNodes, rootFolderNode, errors.New("cannot navigate to parent of root directory")
 			} else {
 				stack = stack[:len(stack)-1]
 			}
@@ -207,7 +222,7 @@ func buildTree(commands []command) ([]*folderNode, error) {
 			currentFolderNode := stack[len(stack)-1]
 
 			if currentFolderNode == nil {
-				return folderNodes, errors.New("output with no preceding command")
+				return folderNodes, rootFolderNode, errors.New("output with no preceding command")
 			}
 
 			for _, i := range c.items {
@@ -227,7 +242,7 @@ func buildTree(commands []command) ([]*folderNode, error) {
 		}
 	}
 
-	return folderNodes, nil
+	return folderNodes, rootFolderNode, nil
 }
 
 type folderNode struct {
